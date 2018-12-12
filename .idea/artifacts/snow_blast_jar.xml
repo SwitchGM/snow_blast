@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="snow_blast:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/snow_blast_jar</output-path>
+    <root id="archive" name="snow_blast.jar">
+      <element id="module-output" name="snow_blast" />
+    </root>
+  </artifact>
+</component>
