@@ -1,10 +1,11 @@
 package com.Switch.snow_blast;
 
-import net.minecraft.server.v1_12_R1.EnumItemSlot;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
+import org.bukkit.entity.Snowman;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ProjectileHitEvent;
@@ -20,7 +21,8 @@ import java.util.HashMap;
  */
 public class Main extends JavaPlugin implements Listener {
 
-    private HashMap<Player, Long> snowballHitMessageMap = new HashMap<>();
+    private HashMap<Player, Long> snowballHitMap = new HashMap<>();
+    private HashMap<Player, Long> freezePlayerMap = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -29,45 +31,49 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onThrow(ProjectileHitEvent event) {
+    public void onHit(ProjectileHitEvent event) {
         if (event.getEntity() instanceof Snowball) {
-            FileConfiguration config = this.getConfig();
-            Player target = (Player) event.getHitEntity();
-            Player shooter = (Player) event.getEntity().getShooter();
-            if (event.getHitEntity() instanceof Player && event.getEntity().getShooter() instanceof Player) {
-                snowballHitMessage(target, shooter);
-            } else { // player hit by snow golem
-                String targetHitByGolemMessage = config.getString("hit_by_snow_golem");
-                target.sendMessage(translateChatColourString(targetHitByGolemMessage));
+            Entity target = event.getHitEntity();
+            Entity shooter = (Entity) event.getEntity().getShooter();
+            if (target instanceof Player) {
+                FileConfiguration config = this.getConfig();
+                int action = (int) (Math.random() * 100);
+                if (action <= config.getInt("snowball_freeze.chance")) { // this is a terrible way of doing chances...
+
+                }
+                snowBallHitMessage((Player) target, shooter);
             }
         }
     }
 
-    private void snowballHitMessage(Player target, Player shooter) {
+    private void snowBallHitMessage(Player target, Entity shooterEntity) {
         FileConfiguration config = this.getConfig();
-        if (snowballHitMessageMap.containsKey(target)) {
-            int cooldown = config.getInt("cooldown");
-            if (snowballHitMessageMap.get(target) + (cooldown * 1000) <= System.currentTimeMillis()) {
-                snowballHitMessageMap.remove(target);
-            }
-        } else {
-            snowballHitMessageMap.put(shooter, System.currentTimeMillis());
-            String snowballTargetMessage = config.getString("snowball_target_message");
-            String snowballShooterMessage = config.getString("snowball_shooter_message");
-            target.sendMessage(translateChatColourString(replacePlaceholders(snowballTargetMessage, target, shooter)));
-            shooter.sendMessage(translateChatColourString(replacePlaceholders(snowballShooterMessage, target, shooter)));
+        if (shooterEntity instanceof Snowman) {
+            String golemMessage = config.getString("snowball_hit.golem_message");
+            target.sendMessage(translateColorCodes(golemMessage));
+        }
+        else if (shooterEntity instanceof Player) {
+            Player shooter = (Player) shooterEntity;
+            String targetMessage = config.getString("snowball_hit.target_message");
+            String shooterMessage = config.getString("snowball_hit.shooter_message");
+            target.sendMessage(translateColorCodes(translatePlaceholder(targetMessage, target, shooter)));
+            target.sendMessage(translateColorCodes(translatePlaceholder(shooterMessage, target, shooter)));
         }
     }
 
-    private String replacePlaceholders(String string, Player target, Player shooter) {
+    private String translatePlaceholder(String string, Player target, Player shooter) {
         String targetPlaceholder = "%target%";
         String shooterPlaceholder = "%shooter%";
-        String newString = string.replaceAll(targetPlaceholder, target.getDisplayName());
-
-        return newString.replaceAll(shooterPlaceholder, shooter.getDisplayName());
+        if (string.contains("%target%")) {
+            string = string.replaceAll(targetPlaceholder, target.getDisplayName());
+        }
+        if (string.contains("%shooter")) {
+            string = string.replaceAll(shooterPlaceholder, shooter.getDisplayName());
+        }
+        return string;
     }
 
-    private String translateChatColourString(String string) {
+    private String translateColorCodes(String string) {
         return ChatColor.translateAlternateColorCodes('&', string);
     }
 
@@ -75,9 +81,16 @@ public class Main extends JavaPlugin implements Listener {
         this.saveDefaultConfig();
         FileConfiguration config = this.getConfig();
 
-        config.addDefault("cooldown", 3);
-        config.addDefault("snowball_target_message", "&9%shooter% hit you");
-        config.addDefault("snowball_shooter_message", "&9You hit %target%");
+        config.addDefault("snowball_hit.cooldown", 3);
+        config.addDefault("snowball_hit.target_message", "&9%shooter% hit you");
+        config.addDefault("snowball_hit.shooter_message", "&9You hit %target%");
+        config.addDefault("snowball_hit.golem_message", "&9A snowman hit you");
+
+        config.addDefault("snowball_freeze.chance", 20);
+        config.addDefault("snowball_freeze.cooldown", 3);
+        config.addDefault("snowball_freeze.target_message", "&9%shooter% froze you");
+        config.addDefault("snowball_freeze.shooter_message", "&9You froze %target%");
+        config.addDefault("snowball_freeze.golem_message", "&9A snowman froze you");
 
         saveConfig();
 

@@ -1,3 +1,8 @@
-cooldown: 3
-snowball_target_message: "&9%shooter% hit you"
-snowball_shooter_message: "&9You hit %target%"
+snowball_hit:
+  cooldown: 3
+  target_message: "&9%shooter% hit you"
+  shooter_message: "&9You hit %target%"
+  golem_message: "&9A snowman hit you"
+snowball_freeze:
+  cooldown: 3
+  target_message: "&9%shooter% froze you"
