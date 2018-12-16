@@ -1,8 +1,17 @@
 snowball_hit:
   cooldown: 3
-  target_message: "&9%shooter% hit you"
-  shooter_message: "&9You hit %target%"
-  golem_message: "&9A snowman hit you"
+  target_message: "&b%shooter% &9hit you"
+  shooter_message: "&9You hit &b%target%"
+  golem_message: "&9A &bsnowman &9hit you"
 snowball_freeze:
+  chance: 20
   cooldown: 3
-  target_message: "&9%shooter% froze you"
+  target_message: "&b%shooter% &9froze you"
+  shooter_message: "&9You froze &b%target%"
+  golem_message: "&9A &bsnowman &9froze you"
+snowball_firework:
+  chance: 20
+  cooldown: 3
+  target_message: "&b%shooter% &9hit you with a firework"
+  shooter_message: "&9You hit &b%target% &9 a firework"
+  golem_message: "&9A &bsnowman &9hit you with a firework"
